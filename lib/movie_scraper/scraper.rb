@@ -1,33 +1,33 @@
 require_relative "../../config/environment"
+require_relative "./Countries.rb"
+require_relative "./movies.rb"
 
-# class JobScraper::Scraper
-
-class Movies
-    attr_accessor :movie_name, :movie_genre, :movie_casts, :release_date
-
-    @@all = []
-
-    def initialize(name, genre, casts, release_date)
-        @name = name
-        @genre = genre
-        @casts = casts
-        @release_date = release_date
-        @@all << self
+class CommandLineInterface
+    def run
+        countries_scraper
     end
 
-    def self.all
-        @@all
+    def scrape_and_display_movies(user_input)
+        movies_scraper(user_input)
+        display_movies
     end
-end
 
-    def get_page
-        doc = Nokogiri::HTML(URI.open('https://www.imdb.com/calendar/?ref_=rlm&region=AU&type=MOVIE'))
+    def countries_scraper
+        doc = Nokogiri::HTML(URI.open("https://www.imdb.com/calendar/?ref_=rlm&region=AU&type=MOVIE"))
 
-        parsed_data = doc.css(".ipc-page-section")
+        doc.css("select#country-selector option").each do |country|
+            country_code = country.attr('value')
+            country = country.text
+            country_object = Countries.new(country_code, country)
+        end
+    end
 
+    def movies_scraper(country_code)
+        doc = Nokogiri::HTML(URI.open("https://www.imdb.com/calendar/?ref_=rlm&region=#{country_code}&type=MOVIE"))
+        
         doc.css("article.sc-f56042d2-1").each do |releasing_date|
             release_date = releasing_date.css(".ipc-title__text").text
-
+        
             releasing_date.css("ul.ipc-metadata-list").css(".ipc-metadata-list-summary-item").each do |movie|
                 movie_title = movie.css("a.ipc-metadata-list-summary-item__t").text
                 movie_genre = []
@@ -40,24 +40,24 @@ end
                     cast_parsed = cast.css("label.ipc-metadata-list-summary-item__li").text.split(/(?<!\s)(?=[A-Z])/)
                     movie_casts = cast_parsed
                 end
-
+        
                 movie = Movies.new(movie_title, movie_genre, movie_casts, release_date)
-
-                puts movie_title
-                puts movie_genre
-                p movie_casts
-                binding.pry
             end
-            binding.pry
         end
     end
 
-    # def scrape_jobs
-    #     get_page.css("div.yvsb870 a._1tmgvw5._1tmgvw7._1tmgvwa._1tmgvwb._1tmgvwe.yvsb870.yvsb87f._14uh994h")
-# end
+    def display_movies
+        Movies.all.each do |movie|
+            puts "--------------------------------"
+            puts "TITLE: #{movie.movie_name}"
+            puts "GENRES: #{movie.movie_genre}"
+            puts "CASTS: #{movie.movie_casts}"
+            puts "RELEASE DATE: #{movie.movie_release_date}"
+            puts "--------------------------------"
+        end
+    end
+end
 
-# doc.css(".ipc-page-section").first.css("ul.ipc-metadata-list").first
 
-get_page
 
 
