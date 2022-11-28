@@ -1,28 +1,38 @@
 require_relative "./scraper.rb"
 
-run_code = CommandLineInterface.new
+user_input = nil
 
-run_code.run
+while user_input != "N" do
+    run_code = Scraper.new
 
-puts "WELCOME"
-puts "To start please select your country code from the list below:"
+    run_code.run
 
-Countries.all.each do |country|
-    puts "#{country.country}: #{country.country_code}" if country.country_code != ""
-end
+    puts "--------------------------------------------------"
+    puts "                UPCOMING MOVIE                    "
+    puts "--------------------------------------------------"
+    puts "To start please select your country code from the list below:"
 
-user_input = gets.chomp.upcase
+    Countries.all.each do |country|
+        puts "#{country.country}: #{country.country_code}" if country.country_code != ""
+    end
 
-while !Countries.all.any? {|country| country.country_code == user_input} 
-    puts "Oh noo, looks like that country code is currently unavailable"
+    user_input = gets.chomp.upcase
+
+    while !Countries.all.any? {|country| country.country_code == user_input} 
+        puts "Oh noo, looks like that country code is currently unavailable"
+        user_input = gets.chomp.upcase
+    end
+
+    puts "You have selected: #{user_input}"
+
+    puts "--------------------------------------------------"
+    puts "                   MOVIES                         "
+    puts "--------------------------------------------------"
+
+    run_code.scrape_and_display_movies(user_input)
+
+    puts "What would you like to do next?"
+    puts "To exit the program, please type \"n\""
+    puts "To search for movies in any other country, please enter any other key"
     user_input = gets.chomp.upcase
 end
-
-# CommandLineInterface.country_code = user_input
-puts "You have selected: #{user_input}"
-
-puts "--------------------------------------------------"
-puts "                   MOVIES                         "
-puts "--------------------------------------------------"
-
-run_code.scrape_and_display_movies(user_input)

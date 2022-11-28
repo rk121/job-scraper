@@ -2,7 +2,7 @@ require_relative "../../config/environment"
 require_relative "./Countries.rb"
 require_relative "./movies.rb"
 
-class CommandLineInterface
+class Scraper
     def run
         countries_scraper
     end
